@@ -36,6 +36,16 @@ class VoidGame(object):
 				return (scourgeTS, sentinelTS)
 		else:
 			return (sentinelTS, scourgeTS)
+	
+	def adjustedTeamscore(self, playername):
+		sentinelTS = sum(x.zscore for x in self.playerStats.values() if self.playersDict[x.playername]["teamname"] == 0)/5
+		scourgeTS = sum(x.zscore for x in self.playerStats.values() if self.playersDict[x.playername]["teamname"] == 1)/5
+		playerscore = self.playerStats[playername].zscore
+		if self.playersDict[playername]["teamname"] == 0:
+			return ((5*sentinelTS-playerscore)/4, scourgeTS)
+		else:
+			return ((5*scourgeTS-playerscore)/4, sentinelTS)
+		
 			
 class VoidPlayer(object):
 	playername = ""
@@ -136,19 +146,16 @@ def main():
 		gameList.append(parseGamePage(page, gameID))
 	scores = list()
 	for game in gameList:
-		scores.append(game.teamscore(playername='ReadyToBrew'))
+		scores.append(game.adjustedTeamscore(playername='ReadyToBrew'))
 
 	goodScore = statistics.mean(x[0] for x in scores)
 	badScore = statistics.mean(x[1] for x in scores)
+	goodDev = statistics.stdev(x[0] for x in scores)
+	badDev = statistics.stdev(x[1] for x in scores)
 	print(goodScore, badScore)
+	print(goodDev, badDev)
 	
-			
-		
-	#firstGID = gameIDList[0]
-	#firstpage = getGamePage(firstGID)
-	#parsedGame = parseGamePage(firstpage, firstGID)
-	#print(parsedGame.getter("iGoOcH","zscore"))
-	#print(parsedGame.players)
+	return
 
 if __name__ == '__main__':
-	main()
+	sys.exit(main())
